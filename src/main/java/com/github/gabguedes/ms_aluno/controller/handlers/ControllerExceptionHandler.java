@@ -3,6 +3,7 @@ package com.github.gabguedes.ms_aluno.controller.handlers;
 import com.github.gabguedes.ms_aluno.dto.CustomErrorDTO;
 import com.github.gabguedes.ms_aluno.dto.FieldMessageDTO;
 import com.github.gabguedes.ms_aluno.dto.ValidationErrorDTO;
+import com.github.gabguedes.ms_aluno.service.exception.DatabaseException;
 import com.github.gabguedes.ms_aluno.service.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.Instant;
 
@@ -41,6 +43,29 @@ public class ControllerExceptionHandler {
         }
 
         return ResponseEntity.status(status).body(validationErrorDTO);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<CustomErrorDTO> handlerMethodValidation(HandlerMethodValidationException e,
+                                                                  HttpServletRequest request){
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        CustomErrorDTO errorDTO = new CustomErrorDTO(Instant.now().toString(),
+                status.value(), "Falha na validação dos dados", request.getRequestURI());
+
+        return ResponseEntity.status(status).body(errorDTO);
+    }
+
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<CustomErrorDTO> databaseExceptio(DatabaseException e,
+                                                           HttpServletRequest request){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        CustomErrorDTO errorDTO = new CustomErrorDTO(Instant.now().toString(),
+                status.value(), e.getMessage(), request.getRequestURI());
+
+        return ResponseEntity.status(status).body(errorDTO);
     }
 
 

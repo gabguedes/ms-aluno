@@ -3,9 +3,11 @@ package com.github.gabguedes.ms_aluno.service;
 import com.github.gabguedes.ms_aluno.dto.AlunoDTO;
 import com.github.gabguedes.ms_aluno.model.Aluno;
 import com.github.gabguedes.ms_aluno.repository.AlunoRepository;
+import com.github.gabguedes.ms_aluno.service.exception.DatabaseException;
 import com.github.gabguedes.ms_aluno.service.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,8 +59,8 @@ public class AlunoService {
         if (repository.existsById(id)) {
             try {
                 repository.deleteById(id);
-            }catch (EntityNotFoundException e){
-                throw new ResourceNotFoundException("Recurso não encontrado -> id: " + id);
+            }catch (DataIntegrityViolationException e){
+                throw new DatabaseException("Falha na integridade referencial");
             }
         } else {
             throw new ResourceNotFoundException("Recurso não encontrado -> id: " + id);
